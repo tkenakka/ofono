@@ -66,7 +66,7 @@ static void ril_set_rat_mode(struct ofono_radio_settings *rs,
 				void *data)
 {
 	struct radio_data *rd = ofono_radio_settings_get_data(rs);
-	struct cb_data *cbd = cb_data_new(cb, data);
+	struct cb_data *cbd = cb_data_new2(rd, cb, data);
 	struct parcel rilp;
 	int pref = rd->ratmode;
 	int ret = 0;
@@ -126,8 +126,16 @@ static void ril_rat_mode_cb(struct ril_msg *message, gpointer user_data)
 			break;
 		case PREF_NET_TYPE_WCDMA:
 		case PREF_NET_TYPE_GSM_WCDMA: /* according to UI design */
-		case PREF_NET_TYPE_GSM_WCDMA_AUTO:/* according to UI design */
-			mode = OFONO_RADIO_ACCESS_MODE_UMTS;
+			break;
+		case PREF_NET_TYPE_GSM_WCDMA_AUTO:
+			/* according to UI design
+			 * If 3G device then map wcdma to automatic for UI*/
+			if (cbd->user) {
+				rd = cbd->user;
+				if (rd->ratmode
+					!= PREF_NET_TYPE_GSM_WCDMA_AUTO)
+					mode = OFONO_RADIO_ACCESS_MODE_UMTS;
+			}
 			break;
 		case PREF_NET_TYPE_LTE_CDMA_EVDO:
 		case PREF_NET_TYPE_LTE_GSM_WCDMA:
@@ -164,7 +172,7 @@ static void ril_query_rat_mode(struct ofono_radio_settings *rs,
 				void *data){
 	DBG("");
 	struct radio_data *rd = ofono_radio_settings_get_data(rs);
-	struct cb_data *cbd = cb_data_new(cb, data);
+	struct cb_data *cbd = cb_data_new2(rd, cb, data);
 	int ret = 0;
 
 	ret = g_ril_send(rd->ril, RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE,
