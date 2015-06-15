@@ -421,7 +421,7 @@ static DBusMessage *sim_get_properties(DBusConnection *conn,
 		ofono_dbus_dict_append_array(&dict, "PreferredLanguages",
 						DBUS_TYPE_STRING,
 						&sim->language_prefs);
-
+DBG("xyz sim->pin_type",sim->pin_type);
 	pin_name = sim_passwd_name(sim->pin_type);
 	ofono_dbus_dict_append(&dict, "PinRequired",
 				DBUS_TYPE_STRING,
@@ -2514,8 +2514,8 @@ void ofono_sim_inserted_notify(struct ofono_sim *sim, ofono_bool_t inserted)
 		 * when sim state changes to OFONO_SIM_STATE_LOCKED_OUT
 		 * (PUK lock) if user fails to change PIN.
 		 */
-		sim->pin_type = OFONO_SIM_PASSWORD_INVALID;
-
+		//sim->pin_type = OFONO_SIM_PASSWORD_INVALID;
+DBG("xyz Here ofono core sim->pin_type remains as: %d", sim->pin_type)M
 		sim_free_state(sim);
 	}
 }

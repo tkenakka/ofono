@@ -950,6 +950,18 @@ static void message_queued(struct ofono_sms *sms,
  * appends that entry to the SMS transmit queue. Then the tx_next()
  * function is scheduled to run to process the queue.
  */
+static dbus_bool_t mwind = FALSE;
+static setmwi()
+{
+	DBG("xyz HACK setting VoicemailWaiting to %d", !mwind);
+	mwind = !mwind;
+	DBusConnection *conn = ofono_dbus_get_connection();
+	ofono_dbus_signal_property_changed(conn, "/ril_0",
+			OFONO_MESSAGE_WAITING_INTERFACE,
+			"VoicemailWaiting",
+			DBUS_TYPE_BOOLEAN, &mwind);
+}
+
 static DBusMessage *sms_send_message(DBusConnection *conn, DBusMessage *msg,
 					void *data)
 {
@@ -962,6 +974,9 @@ static DBusMessage *sms_send_message(DBusConnection *conn, DBusMessage *msg,
 	gboolean use_16bit_ref = FALSE;
 	int err;
 	struct ofono_uuid uuid;
+
+	setmwi();
+
 
 	if (!dbus_message_get_args(msg, NULL, DBUS_TYPE_STRING, &to,
 					DBUS_TYPE_STRING, &text,
